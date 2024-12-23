@@ -1,37 +1,29 @@
 <template>
   <div>
-    <p>{{ title }}</p>
-    <ul>
-      <li v-for="todo in todos" :key="todo.id" @click="increment">
-        {{ todo.id }} - {{ todo.content }}
-      </li>
-    </ul>
-    <p>Count: {{ todoCount }} / {{ meta.totalCount }}</p>
-    <p>Active: {{ active ? 'yes' : 'no' }}</p>
-    <p>Clicks on todos: {{ clickCount }}</p>
+    <p>{{ title }} ver.{{ version }}</p>
+    <p>Bucket size: {{ app.bucket.size }}</p>
+    <p>Last: {{ lastRecord?.filename }}</p>
+    <q-btn color="primary" label="Refresh" @click="app.getLast()" />
+    <q-img :src="thumbUrl(lastRecord!.filename)" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import type { Todo, Meta } from './models';
+import type { ComputedRef } from 'vue'
+import { onMounted, computed } from 'vue'
+import { version, thumbUrl } from '../helpers'
+import { useAppStore } from 'src/stores/app'
+import type { Record } from './models'
 
-interface Props {
-  title: string;
-  todos?: Todo[];
-  meta: Meta;
-  active: boolean;
-};
+defineProps<{
+  title: string
+}>()
 
-const props = withDefaults(defineProps<Props>(), {
-  todos: () => []
-});
+onMounted(() => {
+  // app.getLast()
+  app.bucketRead()
+})
 
-const clickCount = ref(0);
-function increment() {
-  clickCount.value += 1;
-  return clickCount.value;
-}
-
-const todoCount = computed(() => props.todos.length);
+const app = useAppStore()
+const lastRecord: ComputedRef<Record | null> = computed(() => app.lastRecord)
 </script>
