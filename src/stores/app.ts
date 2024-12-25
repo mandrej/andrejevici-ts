@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia'
 import { db } from '../boot/fire'
 import { doc, collection, getDoc, query, orderBy, limit, getDocs } from 'firebase/firestore'
 import type { QuerySnapshot, DocumentData } from '@firebase/firestore'
-import type { Find, Record } from '../components/models'
+import type { Find, Bucket, Record } from '../components/models'
 
 const bucketRef = doc(db, 'Bucket', 'total')
 const photosCol = collection(db, 'Photo')
@@ -10,10 +10,6 @@ const photosCol = collection(db, 'Photo')
 const getRec = (snapshot: QuerySnapshot<DocumentData>) =>
   snapshot.docs.length ? snapshot.docs[0]?.data() : null
 
-export interface Bucket {
-  size: number
-  count: number
-}
 export const useAppStore = defineStore('app', {
   state: () => ({
     bucket: {

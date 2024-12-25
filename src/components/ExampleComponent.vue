@@ -1,29 +1,32 @@
 <template>
   <div>
     <p>{{ title }} ver.{{ version }}</p>
-    <p>Bucket size: {{ app.bucket.size }}</p>
-    <p>Last: {{ lastRecord?.filename }}</p>
-    <q-btn color="primary" label="Refresh" @click="app.getLast()" />
-    <q-img :src="thumbUrl(lastRecord!.filename)" />
+    <p>Bucket size: {{ bucket.size }}</p>
+    <!-- <p>Last: {{ lastRecord!.filename }}</p> -->
+    <q-btn color="primary" label="Exif" @click="exif(lastRecord!.url)" />
+    <q-img :src="lastRecord!.thumb" />
+    <pre>{{ data }}</pre>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { ComputedRef } from 'vue'
-import { onMounted, computed } from 'vue'
-import { version, thumbUrl } from '../helpers'
+import { ref, computed } from 'vue'
+import { version } from '../helpers'
+import readExif from '../helpers/exif'
 import { useAppStore } from 'src/stores/app'
-import type { Record } from './models'
+import type { ComputedRef } from 'vue'
+import type { Bucket, Record } from './models'
 
 defineProps<{
   title: string
 }>()
 
-onMounted(() => {
-  // app.getLast()
-  app.bucketRead()
-})
-
 const app = useAppStore()
+const bucket: ComputedRef<Bucket> = computed(() => app.bucket)
 const lastRecord: ComputedRef<Record | null> = computed(() => app.lastRecord)
+const data = ref({})
+
+const exif = async (url: string) => {
+  data.value = await readExif(url)
+}
 </script>

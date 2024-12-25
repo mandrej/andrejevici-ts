@@ -8,6 +8,10 @@ export interface Find {
   lens?: string
   nick?: string
 }
+export interface Bucket {
+  size: number
+  count: number
+}
 export interface Record {
   filename: string
   headline: string
