@@ -1,6 +1,7 @@
 import exifReader from 'exifreader'
 import { has } from 'lodash'
 import { formatDatum } from './index'
+import type { ExifResult } from '../components/models'
 
 interface LensSwap {
   [key: string]: string
@@ -14,29 +15,13 @@ const LENSES = {
   'Canon EF 50mm f1.8 STM': 'EF50mm f1.8 STM',
 } as LensSwap
 
-interface ExifResult {
-  model: string
-  lens?: string
-  date: string
-  year?: number
-  month?: number
-  day?: number
-  aperture?: number
-  shutter?: string
-  focal_length?: number
-  iso?: number
-  flash?: boolean
-  dim?: [number, number]
-  loc?: string
-}
-
 /**
  * Reads EXIF data from a given image URL and returns extracted metadata.
  *
  * @param url - The URL of the image to read EXIF data from.
  * @returns A promise that resolves to an object containing various image metadata.
  */
-const readExif = async (url: string): Promise<ExifResult> => {
+const readExif = async (url: string): Promise<ExifResult | null> => {
   const result: ExifResult = { model: 'UNKNOWN', date: formatDatum(new Date().toString()) }
   const tags = await exifReader.load(url, { expanded: true })
   // console.log(tags)

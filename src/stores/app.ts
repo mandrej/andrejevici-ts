@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia'
 import { db } from '../boot/fire'
 import { doc, collection, getDoc, query, orderBy, limit, getDocs } from 'firebase/firestore'
 import type { QuerySnapshot, DocumentData } from '@firebase/firestore'
-import type { Find, Bucket, Record } from '../components/models'
+import type { Find, Bucket, PhotoRecord, LastRecord } from '../components/models'
 
 const bucketRef = doc(db, 'Bucket', 'total')
 const photosCol = collection(db, 'Photo')
@@ -17,7 +17,7 @@ export const useAppStore = defineStore('app', {
       count: 0,
     },
     find: {} as Find | null,
-    lastRecord: {} as Record | null,
+    lastRecord: {} as PhotoRecord | null,
   }),
 
   getters: {},
@@ -37,12 +37,12 @@ export const useAppStore = defineStore('app', {
      *
      * @returns The last record, or null if there are no records.
      */
-    async getLast(): Promise<Record | null> {
+    async getLast(): Promise<LastRecord | null> {
       try {
         const constraints = [orderBy('date', 'desc'), limit(1)]
         const q = query(photosCol, ...constraints)
         const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(q)
-        const lastRecord = getRec(querySnapshot) as Record
+        const lastRecord = getRec(querySnapshot) as LastRecord
         if (lastRecord) {
           // Set the href property to the URL of the last month it was taken
           lastRecord.href =
@@ -50,7 +50,7 @@ export const useAppStore = defineStore('app', {
             new URLSearchParams({ year: '' + lastRecord.year, month: '' + lastRecord.month })
         }
         this.lastRecord = lastRecord
-        return lastRecord
+        return lastRecord as LastRecord
       } catch (error) {
         console.error('Failed to get last record:', error)
         return null

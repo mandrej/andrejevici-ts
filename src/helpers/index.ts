@@ -34,6 +34,16 @@ export const formatDatum = (str: string, format = CONFIG.dateFormat) => {
   const date = new Date(str)
   return formatDate(date, format)
 }
+/**
+ * Extract the nickname from an email address.
+ * The nickname is the string before the first period or at sign.
+ * @param email The email address to extract the nickname from.
+ * @returns The nickname extracted from the email address.
+ */
+export const emailNick = (email: string): string => {
+  const match = email.match(/[^.@]+/)
+  return match?.[0] ?? ''
+}
 
 export const version = computed(
   () => process.env.ANDREJEVICI_VERSION.match(/.{1,4}/g)?.join('.') ?? '',

@@ -12,29 +12,39 @@ export interface Bucket {
   size: number
   count: number
 }
-export interface Record {
+export interface ExifResult {
+  date: string
+  day?: number
+  month?: number
+  year?: number
+
+  model: string
+  lens?: string
+  focal_length?: number
+  aperture?: number
+  shutter?: string
+  iso?: number
+  flash?: boolean
+  dim?: [number, number]
+  loc?: string
+}
+export interface PhotoRecord extends ExifResult {
   filename: string
   headline: string
   email: string
   nick: string
-
-  date: string
-  day: number
-  month: number
-  year: number
-
-  aperture?: number
-  shutter?: string
-  iso?: number
-  model?: string
-  lens?: string
-  focal_length?: number
-  flash?: boolean
 
   size: number
   tags?: string[]
   text?: string[]
   thumb?: string
   url: string
-  href?: string
+}
+export interface LastRecord extends PhotoRecord {
+  href: string
+}
+export interface CounterRecord {
+  count: number
+  field: 'year' | 'tags' | 'model' | 'lens' | 'email'
+  value: string
 }
