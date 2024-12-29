@@ -48,3 +48,13 @@ export interface CounterRecord {
   field: 'year' | 'tags' | 'model' | 'lens' | 'email'
   value: string
 }
+export interface userType {
+  uid: string
+  name: string
+  email: string
+  isAuthorized: boolean
+  isAdmin: boolean
+  // signedIn: string
+  allowPush?: boolean
+  askPush?: boolean
+}
