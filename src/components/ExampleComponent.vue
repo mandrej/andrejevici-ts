@@ -3,20 +3,23 @@
     <div class="col">
       <p>{{ title }} ver.{{ version }}</p>
       <p>Bucket size: {{ bucket.size }}</p>
-      <!-- <p>Last: {{ lastRecord!.filename }}</p> -->
-      <q-btn color="primary" label="ExifResult" @click="exif(lastRecord!.url)" />
-      <q-img :src="lastRecord!.thumb" />
+      <q-btn color="primary" label="SignIn" @click="auth.signIn" />
       <pre>{{ data }}</pre>
+    </div>
+    <div class="col">
+      <q-btn color="primary" label="ExifResult" @click="read(lastRecord!.url)" />
+      <q-img :src="lastRecord!.thumb" />
+      <pre>{{ exif }}</pre>
     </div>
     <div class="col">
       <pre>{{ meta.values.tags }}</pre>
     </div>
-    <div class="col">
+    <!-- <div class="col">
       <pre>{{ meta.values.email }}</pre>
       <pre>{{ meta.values.year }}</pre>
       <pre>{{ meta.values.model }}</pre>
       <pre>{{ meta.values.lens }}</pre>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -25,6 +28,7 @@ import { ref, computed } from 'vue'
 import { version } from '../helpers'
 import readExif from '../helpers/exif'
 import { useAppStore } from 'src/stores/app'
+import { useUserStore } from 'src/stores/user'
 import { useValuesStore } from 'src/stores/values'
 import type { ComputedRef } from 'vue'
 import type { Bucket, PhotoRecord, ExifResult } from './models'
@@ -34,12 +38,14 @@ defineProps<{
 }>()
 
 const app = useAppStore()
+const auth = useUserStore()
 const meta = useValuesStore()
 const bucket: ComputedRef<Bucket> = computed(() => app.bucket)
 const lastRecord: ComputedRef<PhotoRecord | null> = computed(() => app.lastRecord)
-const data = ref({} as ExifResult)
+const exif = ref({} as ExifResult)
+const data = computed(() => auth.user)
 
-const exif = async (url: string) => {
-  data.value = (await readExif(url)) as ExifResult
+const read = async (url: string) => {
+  exif.value = (await readExif(url)) as ExifResult
 }
 </script>

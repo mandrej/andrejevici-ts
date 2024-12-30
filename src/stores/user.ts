@@ -12,7 +12,6 @@ import {
   query,
   where,
   writeBatch,
-  deleteField,
 } from 'firebase/firestore'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 // import router from '../router'
@@ -83,26 +82,14 @@ export const useUserStore = defineStore('auth', {
         uid: user.uid,
         isAuthorized: Boolean(familyMember(user.email || '')), // only family members
         isAdmin: Boolean(adminMember(user.email || '')),
-        // signedIn: new Date(Number(user.metadata.lastLoginAt)), // millis
+        signedIn: new Date(),
       }
 
       const docRef = doc(db, 'User', user.uid)
       const docSnap = await getDoc(docRef)
 
       if (docSnap.exists()) {
-        const data = docSnap.data() as {
-          allowPush?: boolean
-          ask_push?: boolean
-          allow_push?: boolean
-        }
-
-        if (data.ask_push || data.allow_push) {
-          await updateDoc(docRef, {
-            allow_push: deleteField(),
-            ask_push: deleteField(),
-          })
-        }
-
+        const data = docSnap.data() as userType
         this.user.allowPush = data.allowPush ?? true
       } else {
         this.user.allowPush = true

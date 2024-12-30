@@ -49,12 +49,12 @@ export interface CounterRecord {
   value: string
 }
 export interface userType {
-  uid: string
+  readonly uid: string
   name: string
   email: string
   isAuthorized: boolean
   isAdmin: boolean
-  // signedIn: string
-  allowPush?: boolean
+  signedIn: Date
   askPush?: boolean
+  allowPush?: boolean
 }
