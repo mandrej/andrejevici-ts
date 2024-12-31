@@ -14,8 +14,7 @@ import {
   //writeBatch,
 } from 'firebase/firestore'
 import notify from '../helpers/notify'
-import CONFIG from '../helpers/config'
-import { emailNick } from '../helpers'
+import { CONFIG, emailNick } from '../helpers'
 import type { DocumentReference } from 'firebase/firestore'
 import type { PhotoRecord } from '../components/models'
 

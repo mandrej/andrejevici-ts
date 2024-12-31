@@ -1,6 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { nextTick } from 'vue'
-import CONFIG from '../helpers/config'
+import { CONFIG } from '../helpers'
 import { auth, db } from '../boot/fire'
 import {
   doc,

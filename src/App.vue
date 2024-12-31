@@ -16,7 +16,7 @@ const meta = useValuesStore()
 
 onMounted(() => {
   app.getLast()
-  app.bucketRead()
+  app.bucketBuild()
   meta.countersBuild(['year', 'tags', 'model', 'lens', 'email'])
 })
 
