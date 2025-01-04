@@ -11,7 +11,7 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
-  //writeBatch,
+  writeBatch,
 } from 'firebase/firestore'
 import notify from '../helpers/notify'
 import { CONFIG, emailNick } from '../helpers'
@@ -268,85 +268,88 @@ export const useValuesStore = defineStore('meta', {
         }
       }
     },
-    // async removeUnusedTags(): Promise<void> {
-    //   let id: string, counterRef: DocumentReference
+    /**
+     * Remove unused tags from the values store and the 'Counter' collection.
+     * @param {string} value - The value to remove.
+     * @returns {Promise<void>} A promise that resolves when the operation is complete.
+     */
+    async removeUnusedTags(value: string): Promise<void> {
+      let id: string, counterRef: DocumentReference
 
-    //   for (const [value, count] of Object.entries(this.values.tags) as [string, number][]) {
-    //     if (count <= 0) {
-    //       try {
-    //         id = counterId('tags', value)
-    //         counterRef = doc(db, 'Counter', id)
-    //         await deleteDoc(counterRef)
-    //       } finally {
-    //         delete this.values.tags[value]
-    //       }
-    //     }
-    //   }
+      if (this.values!.tags[value]! <= 0) {
+        try {
+          id = counterId('tags', value)
+          counterRef = doc(db, 'Counter', id)
+          await deleteDoc(counterRef)
+        } finally {
+          delete this.values.tags[value]
+        }
+      }
 
-    //   const q = query(countersCol, where('field', '==', 'tags'))
-    //   const querySnapshot = await getDocs(q)
-    //   querySnapshot.forEach(async (d) => {
-    //     const obj = d.data() as { count: number; value: string }
-    //     if (obj.count <= 0) {
-    //       try {
-    //         id = counterId('tags', obj.value)
-    //         counterRef = doc(db, 'Counter', id)
-    //         await deleteDoc(counterRef)
-    //       } finally {
-    //         delete this.values.tags[obj.value]
-    //       }
-    //     }
-    //   })
-    // },
-    // async renameValue(
-    //   field: 'year' | 'tags' | 'model' | 'lens' | 'email',
-    //   oldValue: string,
-    //   newValue: string,
-    // ): Promise<void> {
-    //   const batch = writeBatch(db)
-    //   const filter =
-    //     field === 'tags'
-    //       ? where(field, 'array-contains-any', [oldValue])
-    //       : where(field, '==', oldValue)
-    //   const q = query(photosCol, filter, orderBy('date', 'desc'))
-    //   const querySnapshot = await getDocs(q)
+      const q = query(countersCol, where('field', '==', 'tags'), where('value', '==', value))
+      const querySnapshot = await getDocs(q)
+      querySnapshot.forEach(async (d) => {
+        const obj = d.data() as { count: number; value: string }
+        if (obj.count <= 0) {
+          try {
+            id = counterId('tags', obj.value)
+            counterRef = doc(db, 'Counter', id)
+            await deleteDoc(counterRef)
+          } finally {
+            delete this.values.tags[obj.value]
+          }
+        }
+      })
+    },
+    async renameValue(
+      field: 'year' | 'tags' | 'model' | 'lens' | 'email',
+      oldValue: string,
+      newValue: string,
+    ): Promise<void> {
+      const batch = writeBatch(db)
+      const filter =
+        field === 'tags'
+          ? where(field, 'array-contains-any', [oldValue])
+          : where(field, '==', oldValue)
+      const q = query(photosCol, filter, orderBy('date', 'desc'))
+      const querySnapshot = await getDocs(q)
 
-    //   querySnapshot.forEach((d) => {
-    //     const photoRef = doc(db, 'Photo', d.id)
-    //     if (field === 'tags') {
-    //       const obj = d.data()
-    //       const idx = obj.tags.indexOf(oldValue)
-    //       obj.tags.splice(idx, 1, newValue)
-    //       batch.update(photoRef, { [field]: obj.tags })
-    //     } else {
-    //       batch.update(photoRef, { [field]: newValue })
-    //     }
-    //   })
+      querySnapshot.forEach((d) => {
+        const photoRef = doc(db, 'Photo', d.id)
+        if (field === 'tags') {
+          const obj = d.data()
+          const idx = obj.tags.indexOf(oldValue)
+          obj.tags.splice(idx, 1, newValue)
+          batch.update(photoRef, { [field]: obj.tags })
+        } else {
+          batch.update(photoRef, { [field]: newValue })
+        }
+      })
 
-    //   await batch.commit()
+      await batch.commit()
 
-    //   const oldRef = doc(db, 'Counter', counterId(field, oldValue))
-    //   const newRef = doc(db, 'Counter', counterId(field, newValue))
-    //   const counter = await getDoc(oldRef)
-    //   const obj = counter.data() as { count: number }
+      const oldRef = doc(db, 'Counter', counterId(field, oldValue))
+      const newRef = doc(db, 'Counter', counterId(field, newValue))
+      const counter = await getDoc(oldRef)
+      const obj = counter.data() as { count: number }
 
-    //   await setDoc(
-    //     newRef,
-    //     {
-    //       count: obj.count,
-    //       field: field,
-    //       value: newValue,
-    //     },
-    //     { merge: true },
-    //   )
-    //   await deleteDoc(oldRef)
+      await setDoc(
+        newRef,
+        {
+          count: obj.count,
+          field: field,
+          value: newValue,
+        },
+        { merge: true },
+      )
+      await deleteDoc(oldRef)
 
-    //   this.values[field][newValue] = obj.count
-    //   delete this.values[field][oldValue]
-    // },
-    // addNewField(val: string, field: 'year' | 'tags' | 'model' | 'lens' | 'email'): void {
-    //   this.values[field][val] = 1
-    // },
+      this.values[field][newValue] = obj.count
+      delete this.values[field][oldValue]
+    },
+    addNewField(val: string, field: 'year' | 'tags' | 'model' | 'lens' | 'email'): void {
+      this.values[field][val] = 1
+    },
   },
 })
 

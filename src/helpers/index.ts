@@ -4,7 +4,7 @@ import { slugify } from 'transliteration'
 import { computed } from 'vue'
 import type { PhotoRecord } from '../components/models'
 
-const reFilename = new RegExp(/^(.*?)(\.[^.]*)?$/) as RegExp
+export const reFilename = new RegExp(/^(.*?)(\.[^.]*)?$/) as RegExp
 const { humanStorageSize } = format
 const { formatDate } = date
 
