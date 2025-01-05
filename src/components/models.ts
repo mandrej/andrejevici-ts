@@ -13,12 +13,12 @@ export interface Bucket {
   count: number
 }
 export interface ExifResult {
-  date: string
+  date?: string
   day?: number
   month?: number
   year?: number
 
-  model: string
+  model?: string
   lens?: string
   focal_length?: number
   aperture?: number
@@ -29,16 +29,16 @@ export interface ExifResult {
   loc?: string
 }
 export interface PhotoRecord extends ExifResult {
+  url: string
   filename: string
-  headline: string
+  size: number
   email: string
   nick: string
 
-  size: number
+  headline?: string
   tags?: string[]
   text?: string[]
   thumb?: string
-  url: string
 }
 export interface LastRecord extends PhotoRecord {
   href: string

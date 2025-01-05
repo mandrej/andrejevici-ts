@@ -18,9 +18,12 @@
       <pre>{{ meta.values.model }}</pre>
       <pre>{{ meta.values.lens }}</pre>
     </div> -->
-    <div class="col">
+    <!-- <div class="col">
       <q-btn color="primary" label="Fetch" @click="app.fetchRecords()" />
       <pre>{{ app.objects }}</pre>
+    </div> -->
+    <div class="col">
+      <q-btn color="primary" label="Mismatch" @click="mismatch" />
     </div>
   </div>
 </template>
@@ -31,6 +34,7 @@ import { version } from '../helpers'
 import readExif from '../helpers/exif'
 import { useAppStore } from 'src/stores/app'
 import { useUserStore } from 'src/stores/user'
+import { mismatch } from 'src/helpers/remedy'
 // import { useValuesStore } from 'src/stores/values'
 import type { ComputedRef } from 'vue'
 import type { Bucket, PhotoRecord, ExifResult } from './models'
