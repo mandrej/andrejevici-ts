@@ -11,9 +11,9 @@ import notify from './notify'
 
 const app = useAppStore()
 const auth = useUserStore()
-const router = useRouter()
+const router = useRouter() // TODO inject() can only be used inside setup() or functional components.
 const photosCol = collection(db, 'Photo')
-import type { PhotoRecord } from '../components/models'
+import type { UploadedItem } from '../components/models'
 
 import type { DocumentData, QuerySnapshot } from 'firebase/firestore'
 
@@ -52,9 +52,9 @@ export const fix = async (): Promise<void> => {
  * Gets the metadata and download URL for a file in the default Google Cloud
  * Storage bucket.
  * @param {string} filename - The name of the file to retrieve.
- * @returns {Promise<PhotoRecord>} - A promise that resolves with the file metadata and download URL.
+ * @returns {Promise<UploadedItem>} - A promise that resolves with the file metadata and download URL.
  */
-const getStorageData = async (filename: string): Promise<PhotoRecord> => {
+const getStorageData = async (filename: string): Promise<UploadedItem> => {
   const _ref = storageRef(storage, filename)
   const downloadURL = await getDownloadURL(_ref)
   const metadata = await getMetadata(_ref)
@@ -102,13 +102,7 @@ export const mismatch = async (): Promise<void> => {
   storageNames.sort()
 
   let missing: string[]
-  const promises: Promise<{
-    url: string
-    filename: string
-    size: number
-    email: string
-    nick: string
-  }>[] = []
+  const promises: Promise<UploadedItem>[] = []
   if (bucketNames.length >= storageNames.length) {
     // uploaded to bucket but no record in firestore
     missing = bucketNames.filter((x) => storageNames.indexOf(x) === -1)

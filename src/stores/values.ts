@@ -16,7 +16,7 @@ import {
 import notify from '../helpers/notify'
 import { CONFIG, emailNick } from '../helpers'
 import type { DocumentReference } from 'firebase/firestore'
-import type { PhotoRecord } from '../components/models'
+import type { StoredItem } from '../components/models'
 
 interface ValuesState {
   tagsToApply: string[]
@@ -121,7 +121,7 @@ export const useValuesStore = defineStore('meta', {
         email: {},
       }
       querySnapshot.forEach((d) => {
-        const obj = d.data() as PhotoRecord
+        const obj = d.data() as StoredItem
         for (const field of fields) {
           let value
           if (field === 'tags') {
@@ -207,7 +207,7 @@ export const useValuesStore = defineStore('meta', {
         )
       }
     },
-    async increaseValues(newData: PhotoRecord): Promise<void> {
+    async increaseValues(newData: StoredItem): Promise<void> {
       for (const field of CONFIG.photo_filter as Array<
         'year' | 'tags' | 'model' | 'lens' | 'email'
       >) {
@@ -251,7 +251,7 @@ export const useValuesStore = defineStore('meta', {
         }
       }
     },
-    async decreaseValues(oldData: PhotoRecord): Promise<void> {
+    async decreaseValues(oldData: StoredItem): Promise<void> {
       for (const field of CONFIG.photo_filter as Array<
         'year' | 'tags' | 'model' | 'lens' | 'email'
       >) {

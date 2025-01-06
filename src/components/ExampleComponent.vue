@@ -37,7 +37,7 @@ import { useUserStore } from 'src/stores/user'
 import { mismatch } from 'src/helpers/remedy'
 // import { useValuesStore } from 'src/stores/values'
 import type { ComputedRef } from 'vue'
-import type { Bucket, PhotoRecord, ExifResult } from './models'
+import type { Bucket, StoredItem, ExifResult } from './models'
 
 defineProps<{
   title: string
@@ -47,7 +47,7 @@ const app = useAppStore()
 const auth = useUserStore()
 // const meta = useValuesStore()
 const bucket: ComputedRef<Bucket> = computed(() => app.bucket)
-const lastRecord: ComputedRef<PhotoRecord | null> = computed(() => app.lastRecord)
+const lastRecord: ComputedRef<StoredItem | null> = computed(() => app.lastRecord)
 const exif = ref({} as ExifResult)
 const data = computed(() => auth.user)
 

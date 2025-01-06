@@ -2,7 +2,7 @@ import CONFIG from '../../config'
 import { date, format } from 'quasar'
 import { slugify } from 'transliteration'
 import { computed } from 'vue'
-import type { PhotoRecord } from '../components/models'
+import type { UploadedItem, StoredItem } from '../components/models'
 
 export const reFilename = new RegExp(/^(.*?)(\.[^.]*)?$/) as RegExp
 const { humanStorageSize } = format
@@ -62,30 +62,35 @@ export const version = computed(
   () => process.env.ANDREJEVICI_VERSION.match(/.{1,4}/g)?.join('.') ?? '',
 )
 /**
- * Removes an object from an array of PhotoRecord based on a specified property and value.
- * @param arr - The array of PhotoRecord objects to search.
- * @param property - The property name to match on each PhotoRecord.
- * @param value - The value to match against the specified property.
- * @returns void
+ * Removes an object from an array of StoredItem based on a specified property and value.
+ * @param {UploadedItem[] | StoredItem[]} arr - The array of StoredItem objects to search.
+ * @param {string} value - The value to match against the specified property.
+ * @returns {void}
  */
-export const removeByProperty = (
-  arr: PhotoRecord[],
-  property: keyof PhotoRecord,
+export const removeByFilename = <T extends UploadedItem | StoredItem>(
+  arr: T[],
   value: string,
 ): void => {
-  const idx = arr.findIndex((it) => it[property] === value)
+  const idx = arr.findIndex((it) => it.filename === value)
   if (idx > -1) arr.splice(idx, 1)
 }
-export const changedByProperty = (
-  arr: PhotoRecord[],
-  property: keyof PhotoRecord,
-  obj: PhotoRecord,
-  op = 1,
-) => {
-  const idx = arr.findIndex((it) => it[property] === obj[property])
+/**
+ * Replace an object in an array of StoredItem based on a specified property and value.
+ * @param {StoredItem[]} arr - The array of StoredItem objects to search.
+ * @param {StoredItem} obj - The StoredItem object to replace the matched object.
+ * @param {number} [op=1] - The number of elements to replace. Defaults to 1.
+ * @returns {StoredItem[]} The modified array of StoredItem objects.
+ */
+export const changedByFilename = (
+  arr: StoredItem[],
+  obj: StoredItem,
+  op: number = 1,
+): StoredItem[] => {
+  const idx = arr.findIndex((it) => it.filename === obj.filename)
   if (idx >= 0) {
     arr.splice(idx, op, obj)
   }
+  return arr
 }
 export const textSlug = (text: string): string => {
   // return slugify(text, { replace: [[/[\.|\:|-]/g, ""]] });

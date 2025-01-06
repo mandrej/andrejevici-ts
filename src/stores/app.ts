@@ -4,8 +4,8 @@ import {
   CONFIG,
   textSlug,
   sliceSlug,
-  changedByProperty,
-  removeByProperty,
+  changedByFilename,
+  removeByFilename,
   thumbName,
   thumbUrl,
 } from 'src/helpers'
@@ -34,7 +34,7 @@ import type {
   QueryFieldFilterConstraint,
   QueryDocumentSnapshot,
 } from '@firebase/firestore'
-import type { Find, Bucket, PhotoRecord, LastRecord } from '../components/models'
+import type { Find, Bucket, UploadedItem, StoredItem, LastRecord } from '../components/models'
 
 const bucketRef = doc(db, 'Bucket', 'total')
 const photosCol = collection(db, 'Photo')
@@ -58,12 +58,12 @@ export const useAppStore = defineStore('app', {
       count: 0,
     },
     find: { year: 2024, month: 1 } as Find | null,
-    uploaded: [] as PhotoRecord[],
-    objects: [] as PhotoRecord[],
+    uploaded: [] as UploadedItem[],
+    objects: [] as StoredItem[],
     next: null as string | null,
-    currentEdit: {} as PhotoRecord,
+    currentEdit: {} as StoredItem,
     markerFileName: null as string | null,
-    lastRecord: {} as PhotoRecord | null,
+    lastRecord: {} as StoredItem | null,
     sinceYear: '',
 
     busy: false,
@@ -140,7 +140,7 @@ export const useAppStore = defineStore('app', {
       reset = false,
       invoked = '',
     ): Promise<{
-      objects: PhotoRecord[]
+      objects: StoredItem[]
       error: string | null
       next: string | null
     }> {
@@ -187,7 +187,7 @@ export const useAppStore = defineStore('app', {
         const querySnapshot: QuerySnapshot = await getDocs(q)
         if (reset) this.objects.length = 0
         querySnapshot.forEach((d: QueryDocumentSnapshot) => {
-          this.objects.push(d.data() as PhotoRecord)
+          this.objects.push(d.data() as StoredItem)
         })
         const next: DocumentSnapshot | null =
           querySnapshot.docs[querySnapshot.docs.length - 1] || null
@@ -200,7 +200,7 @@ export const useAppStore = defineStore('app', {
         this.error = (err as Error).message
         this.busy = false
         return {
-          objects: [] as PhotoRecord[],
+          objects: [] as StoredItem[],
           error: (err as Error).message,
           next: null,
         }
@@ -231,18 +231,18 @@ export const useAppStore = defineStore('app', {
     /**
      * Saves a photo record to the database and updates local state.
      *
-     * @param {PhotoRecord} obj - The photo record object to be saved.
+     * @param {StoredItem} obj - The photo record object to be saved.
      * @returns {Promise<void>} A promise that resolves when the record is saved.
      */
-    async saveRecord(obj: PhotoRecord): Promise<void> {
+    async saveRecord(obj: StoredItem): Promise<void> {
       const docRef = doc(db, 'Photo', obj.filename)
       const meta = useValuesStore()
       if (obj.thumb) {
         const oldDoc = await getDoc(docRef)
-        meta.decreaseValues(oldDoc.data() as PhotoRecord)
+        meta.decreaseValues(oldDoc.data() as StoredItem)
         await setDoc(docRef, obj, { merge: true })
 
-        changedByProperty(this.objects, 'filename', obj)
+        changedByFilename(this.objects, obj)
         notify({ message: `${obj.filename} updated` })
         meta.increaseValues(obj)
       } else {
@@ -255,10 +255,10 @@ export const useAppStore = defineStore('app', {
         }
         // save everything
         await setDoc(docRef, obj, { merge: true })
-        changedByProperty(this.objects, 'filename', obj, 0)
+        changedByFilename(this.objects, obj, 0)
         notify({ message: `${obj.filename} published` })
         // delete uploaded
-        removeByProperty(this.uploaded, 'filename', obj.filename)
+        removeByFilename(this.uploaded, obj.filename)
 
         this.bucketDiff(obj.size)
         meta.increaseValues(obj)
@@ -268,10 +268,10 @@ export const useAppStore = defineStore('app', {
      * Delete a photo record from the database, and if it has a thumbnail,
      * delete the thumbnail from Google Cloud Storage.
      *
-     * @param {PhotoRecord} obj - The photo record to delete.
+     * @param {StoredItem} obj - The photo record to delete.
      * @returns {Promise<void>} A promise that resolves when the record is deleted.
      */
-    async deleteRecord(obj: PhotoRecord): Promise<void> {
+    async deleteRecord(obj: StoredItem): Promise<void> {
       notify({
         group: `${obj.filename}`,
         message: `Please wait`,
@@ -279,14 +279,14 @@ export const useAppStore = defineStore('app', {
       if (obj.thumb) {
         const docRef = doc(db, 'Photo', obj.filename)
         const docSnap = await getDoc(docRef)
-        const data = docSnap.data() as PhotoRecord
+        const data = docSnap.data() as StoredItem
         const stoRef = storageRef(storage, obj.filename)
         const thumbRef = storageRef(storage, thumbName(obj.filename))
         await deleteDoc(docRef)
         await deleteObject(stoRef)
         await deleteObject(thumbRef)
 
-        removeByProperty(this.objects, 'filename', obj.filename)
+        removeByFilename(this.objects, obj.filename)
         const meta = useValuesStore()
         this.bucketDiff(-data.size)
         meta.decreaseValues(data)
@@ -301,7 +301,7 @@ export const useAppStore = defineStore('app', {
           await deleteObject(stoRef)
           await deleteObject(thumbRef)
         } finally {
-          removeByProperty(this.uploaded, 'filename', obj.filename)
+          removeByFilename(this.uploaded, obj.filename)
         }
         notify({
           group: `${obj.filename}`,
