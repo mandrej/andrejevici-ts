@@ -57,19 +57,19 @@ export const useValuesStore = defineStore('meta', {
     },
   }),
   getters: {
-    tagsValues: (state): string[] => {
+    tagsValues: (state: ValuesState): string[] => {
       return Object.keys(state.values.tags).sort()
     },
-    modelValues: (state): string[] => {
+    modelValues: (state: ValuesState): string[] => {
       return Object.keys(byCountReverse(state, 'model'))
     },
-    lensValues: (state): string[] => {
+    lensValues: (state: ValuesState): string[] => {
       return Object.keys(byCountReverse(state, 'lens'))
     },
-    emailValues: (state): string[] => {
+    emailValues: (state: ValuesState): string[] => {
       return Object.keys(byCountReverse(state, 'email'))
     },
-    nickValues: (state): string[] => {
+    nickValues: (state: ValuesState): string[] => {
       const ret: string[] = []
       const emails = byCountReverse(state, 'email')
       Object.keys(emails).forEach((key) => {
@@ -77,15 +77,42 @@ export const useValuesStore = defineStore('meta', {
       })
       return ret
     },
-    yearValues: (state): string[] => {
+    yearValues: (state: ValuesState): string[] => {
       return Object.keys(state.values.year).reverse()
     },
-    yearWithCount: (state): Array<{ value: string; count: number }> => {
+    yearWithCount: (state: ValuesState): Array<{ value: string; count: number }> => {
       const ret: Array<{ value: string; count: number }> = []
       for (const year of Object.keys(state.values.year).reverse()) {
         ret.push({ value: year, count: state.values.year[year] || 0 })
       }
       return ret
+    },
+    nickWithCount(state: ValuesState): { [key: string]: number } {
+      const emails = byCountReverse(state, 'email')
+      return Object.keys(emails)
+        .filter((key): key is string => emails[key]! > 0)
+        .reduce(
+          (obj, key): { [key: string]: number } => {
+            obj[emailNick(key)] = emails[key]!
+            return obj
+          },
+          {} as { [key: string]: number },
+        )
+    },
+    tagsWithCount: (state: ValuesState): { [key: string]: number } => {
+      return Object.keys(state.values.tags)
+        .sort()
+        .filter((key): key is string => state.values.tags[key]! > 0)
+        .reduce(
+          (obj, key): { [key: string]: number } => {
+            const count = state.values.tags[key]
+            if (count !== undefined) {
+              obj[key] = count
+            }
+            return obj
+          },
+          {} as { [key: string]: number },
+        )
     },
   },
   actions: {
@@ -101,9 +128,12 @@ export const useValuesStore = defineStore('meta', {
         this.values[field][obj.value] = obj.count
       })
     },
-    async countersBuild(
-      fields: Array<'year' | 'tags' | 'model' | 'lens' | 'email'>,
-    ): Promise<void> {
+    /**
+     * Build the counter documents for all photos in the Photo collection.
+     *
+     * @returns {Promise<void>} Resolves when all counter documents have been written.
+     */
+    async countersBuild(): Promise<void> {
       notify({
         message: `Please wait`,
         actions: [{ icon: 'close' }],
@@ -112,7 +142,7 @@ export const useValuesStore = defineStore('meta', {
       const q = query(photosCol, orderBy('date', 'desc'))
       const querySnapshot = await getDocs(q)
       const val: {
-        [key in 'year' | 'tags' | 'model' | 'lens' | 'email']: { [key: string]: number }
+        [field in 'year' | 'tags' | 'model' | 'lens' | 'email']: { [key: string]: number }
       } = {
         year: {},
         tags: {},
@@ -120,58 +150,36 @@ export const useValuesStore = defineStore('meta', {
         lens: {},
         email: {},
       }
-      querySnapshot.forEach((d) => {
-        const obj = d.data() as StoredItem
-        for (const field of fields) {
-          let value
-          if (field === 'tags') {
-            for (const tag of obj[field] as string[]) {
-              if (val[field][tag]) {
-                val[field][tag]++
-              } else {
-                val[field][tag] = 1
-              }
-            }
-          } else if (field === 'year') {
-            value = ('' + obj[field]) as string
-            if (value && val[field][value]) {
-              val[field][value] = (val[field][value] ?? 0) + 1
-            } else {
-              val[field][value] = 1
-            }
-          } else {
-            value = obj[field] as string
-            if (value && val[field][value]) {
-              val[field][value] = (val[field][value] ?? 0) + 1
-            } else {
-              val[field][value] = 1
-            }
-          }
-        }
-      })
-      let id: string, counterRef: DocumentReference
-      for (const field of fields) {
-        for (const [key, count] of Object.entries(val[field])) {
-          id = counterId(field, key)
-          counterRef = doc(db, 'Counter', id)
-          await setDoc(
-            counterRef,
-            {
-              count: count,
-              field: field,
-              value: key,
-            },
-            { merge: true },
-          )
-          this.values[field] = { ...this.values[field], ...val[field] }
-        }
-        notify({
-          message: `Values for ${field} updated`,
-          group: 'build',
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data()
+        const year = new Date(data.date).getFullYear().toString()
+        const tags = data.tags || []
+        const model = data.model || 'unknown'
+        const lens = data.lens || 'unknown'
+        const email = data.email || 'unknown'
+
+        val.year[year] = (val.year[year] || 0) + 1
+        tags.forEach((tag: string) => {
+          val.tags[tag] = (val.tags[tag] || 0) + 1
         })
-      }
+        val.model[model] = (val.model[model] || 0) + 1
+        val.lens[lens] = (val.lens[lens] || 0) + 1
+        val.email[email] = (val.email[email] || 0) + 1
+      })
+
+      const batch = writeBatch(db)
+      Object.keys(val).forEach((field) => {
+        Object.keys(val[field as keyof typeof val]).forEach((value) => {
+          const count = val[field as keyof typeof val][value]
+          const docRef = doc(countersCol, `${field}_${value}`)
+          batch.set(docRef, { field, value, count })
+        })
+      })
+
+      await batch.commit()
       notify({
-        message: `All done`,
+        message: `Counters have been built successfully`,
         actions: [{ icon: 'close' }],
         group: 'build',
       })
@@ -268,28 +276,25 @@ export const useValuesStore = defineStore('meta', {
         }
       }
     },
-    /**
-     * Remove unused tags from the values store and the 'Counter' collection.
-     * @param {string} value - The value to remove.
-     * @returns {Promise<void>} A promise that resolves when the operation is complete.
-     */
-    async removeUnusedTags(value: string): Promise<void> {
-      let id: string, counterRef: DocumentReference
-
-      if (this.values!.tags[value]! <= 0) {
-        try {
-          id = counterId('tags', value)
-          counterRef = doc(db, 'Counter', id)
-          await deleteDoc(counterRef)
-        } finally {
-          delete this.values.tags[value]
+    async removeUnusedTags(): Promise<void> {
+      // delete from store
+      let id, counterRef: DocumentReference
+      for (const [value, count] of Object.entries(this.values.tags)) {
+        if (count <= 0) {
+          try {
+            id = counterId('tags', value)
+            counterRef = doc(db, 'Counter', id)
+            await deleteDoc(counterRef)
+          } finally {
+            delete this.values.tags[value]
+          }
         }
       }
-
-      const q = query(countersCol, where('field', '==', 'tags'), where('value', '==', value))
+      // delete from database
+      const q = query(countersCol, where('field', '==', 'tags'))
       const querySnapshot = await getDocs(q)
       querySnapshot.forEach(async (d) => {
-        const obj = d.data() as { count: number; value: string }
+        const obj = d.data()
         if (obj.count <= 0) {
           try {
             id = counterId('tags', obj.value)

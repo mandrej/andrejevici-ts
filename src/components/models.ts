@@ -1,9 +1,11 @@
-export interface Find {
-  text?: string
-  tags?: string[]
+export interface NumericFind {
   year?: number
   month?: number
   day?: number
+}
+export interface Find extends NumericFind {
+  text?: string
+  tags?: string[]
   model?: string
   lens?: string
   nick?: string

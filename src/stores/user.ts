@@ -132,15 +132,14 @@ export const useUserStore = defineStore('auth', {
       await updateDoc(docRef, this.user!)
     },
     /**
-     * Updates the device document in the database.
-     * @param {string} token - The device token.
-     * @param {userType} user - The user object.
+     * Updates the device document in the database with the current user's email and timestamp.
+     * @param {string} token - The token representing the device.
      * @returns {Promise<void>} A promise that resolves when the update is complete.
      */
-    async updateDevice(token: string, user: userType): Promise<void> {
+    async updateDevice(token: string): Promise<void> {
       const docRef = doc(db, 'Device', token)
       const data: { email: string; stamp: Date } = {
-        email: user.email,
+        email: this.user!.email,
         stamp: new Date(),
       }
       await setDoc(docRef, data, { merge: true })

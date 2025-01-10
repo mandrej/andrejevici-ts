@@ -1959,6 +1959,11 @@
   resolved "https://registry.yarnpkg.com/@types/trusted-types/-/trusted-types-2.0.7.tgz#baccb07a970b91707df3a3e8ba6896c57ead2d11"
   integrity sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==
 
+"@types/uuid4@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@types/uuid4/-/uuid4-2.0.3.tgz#0dd3e35f4ee1d379d3f29c09f5d94fa405ad36b4"
+  integrity sha512-/fyn8jzKzeL/wci7GOaz8TPjKapD+WJUBUCr/ED2xcUcx5fA9rZH2fDZiV2Z/a+040mp5Zi3dgIi/Vey/uQBxw==
+
 "@typescript-eslint/eslint-plugin@8.18.1", "@typescript-eslint/eslint-plugin@^8.15.0":
   version "8.18.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-8.18.1.tgz#992e5ac1553ce20d0d46aa6eccd79dc36dedc805"
@@ -5704,6 +5709,11 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
+swiper@^11.2.0:
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/swiper/-/swiper-11.2.0.tgz#fbef83ab8fe165ceff82c69177a57033809cb1c2"
+  integrity sha512-rjjAKgDEs+grR2eQshVDCcE4KNPC7CI294nfcbV9gE8WCsLdvOYXDeZKUYevqAZZp8j5hE7kpT3dAGVKFBWlxQ==
+
 sync-child-process@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/sync-child-process/-/sync-child-process-1.0.2.tgz#45e7c72e756d1243e80b547ea2e17957ab9e367f"
@@ -6009,6 +6019,11 @@ utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==
+
+uuid4@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/uuid4/-/uuid4-2.0.3.tgz#241e5dfe1704a79c52e2aa40e7e581a5e7b01ab4"
+  integrity sha512-CTpAkEVXMNJl2ojgtpLXHgz23dh8z81u6/HEPiQFOvBc/c2pde6TVHmH4uwY0d/GLF3tb7+VDAj4+2eJaQSdZQ==
 
 varint@^6.0.0:
   version "6.0.0"
