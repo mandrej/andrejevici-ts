@@ -4,6 +4,15 @@ import { reFilename, fakeHistory, removeHash } from './index'
 import { useAppStore } from '../stores/app'
 import { useValuesStore } from '../stores/values'
 
+// initialize the pinia store
+import App from '../App.vue'
+import { createPinia } from 'pinia'
+import { createApp } from 'vue'
+
+const pinia = createPinia()
+const APP = createApp(App)
+APP.use(pinia)
+
 const app = useAppStore()
 const meta = useValuesStore()
 import notify from '../helpers/notify'

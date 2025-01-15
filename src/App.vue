@@ -15,9 +15,11 @@ const auth = useUserStore()
 const meta = useValuesStore()
 
 onMounted(() => {
-  app.getLast()
-  app.bucketBuild()
-  meta.countersBuild()
+  app.getSince()
+  app.bucketRead()
+  if (meta.emailValues.length === 0) {
+    meta.countersBuild()
+  }
 })
 
 onAuthStateChanged(getAuth(), (user) => {

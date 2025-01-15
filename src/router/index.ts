@@ -1,11 +1,15 @@
-import { defineRouter } from '#q-app/wrappers';
+import { nextTick } from 'vue'
+import { defineRouter } from '#q-app/wrappers'
 import {
   createMemoryHistory,
   createRouter,
   createWebHashHistory,
   createWebHistory,
-} from 'vue-router';
-import routes from './routes';
+} from 'vue-router'
+import { useUserStore } from 'src/stores/user'
+import routes from './routes'
+import type { RouteLocationNormalized } from 'vue-router'
+import type { userType } from '../components/models'
 
 /*
  * If not building with SSR mode, you can
@@ -15,21 +19,43 @@ import routes from './routes';
  * async/await or return a Promise which resolves
  * with the Router instance.
  */
-
 export default defineRouter(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
+    : process.env.VUE_ROUTER_MODE === 'history'
+      ? createWebHistory
+      : createWebHashHistory
 
-  const Router = createRouter({
-    scrollBehavior: () => ({ left: 0, top: 0 }),
+  // Leave this as is and make changes in quasar.conf.js instead!
+  // quasar.conf.js -> build -> vueRouterMode
+  // quasar.conf.js -> build -> publicPath
+  const history = createHistory(process.env.VUE_ROUTER_BASE)
+
+  async function beforeEach(to: RouteLocationNormalized) {
+    const auth = useUserStore()
+    const user = auth.user as userType | null
+
+    if (to.meta.requiresAuth && !(user && user.isAuthorized)) {
+      return { name: '401', replace: true }
+    } else if (to.meta.requiresAdmin && !(user && user.isAdmin)) {
+      return { name: '401', replace: true }
+    }
+  }
+
+  async function afterEach(to: RouteLocationNormalized) {
+    // Use next tick to handle router history correctly
+    nextTick(() => {
+      document.title = to.meta.title as string
+    })
+  }
+
+  const router = createRouter({
+    history,
     routes,
+  })
 
-    // Leave this as is and make changes in quasar.conf.js instead!
-    // quasar.conf.js -> build -> vueRouterMode
-    // quasar.conf.js -> build -> publicPath
-    history: createHistory(process.env.VUE_ROUTER_BASE),
-  });
+  router.beforeEach(beforeEach)
+  router.afterEach(afterEach)
 
-  return Router;
-});
+  return router
+})

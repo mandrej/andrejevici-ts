@@ -58,10 +58,6 @@
       <q-tab-panel name="tags" class="q-pa-none">
         <Tags-Tab />
       </q-tab-panel>
-
-      <q-tab-panel name="camera" class="q-pa-none">
-        <Camera-Tab />
-      </q-tab-panel>
     </q-tab-panels>
   </q-page>
 </template>
@@ -76,7 +72,6 @@ import notify from '../helpers/notify'
 import { CONFIG, formatDatum } from '../helpers'
 
 const TagsTab = defineAsyncComponent(() => import('../components/Tags-Tab.vue'))
-const CameraTab = defineAsyncComponent(() => import('../components/Camera-Tab.vue'))
 
 const app = useAppStore()
 const meta = useValuesStore()

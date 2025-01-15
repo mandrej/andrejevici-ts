@@ -57,7 +57,7 @@ export const useAppStore = defineStore('app', {
       size: 0,
       count: 0,
     },
-    find: { year: 2024, month: 1 } as Find | null,
+    find: {} as Find | null,
     uploaded: [] as UploadedItem[],
     objects: [] as StoredItem[],
     next: null as string | null,
@@ -333,6 +333,15 @@ export const useAppStore = defineStore('app', {
         console.error('Failed to get last record:', error)
         return null
       }
+    },
+    async getSince() {
+      const q = query(photosCol, orderBy('date', 'asc'), limit(1))
+      const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(q)
+      if (querySnapshot.empty) return null
+      querySnapshot.forEach((d) => {
+        const obj = d.data()
+        this.sinceYear = obj.year
+      })
     },
   },
 })

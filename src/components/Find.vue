@@ -4,10 +4,10 @@
       v-model="tmp.text"
       :disable="app.busy"
       label="by title"
-      clearable
       @blur="submit"
       :dense="$q.screen.xs"
       dark
+      clearable
     />
     <q-select
       v-model="tmp.tags"
@@ -18,6 +18,7 @@
       :dense="$q.screen.xs"
       dark
       multiple
+      clearable
       @update:model-value="
         (newValue) => {
           tmp.tags = newValue
@@ -34,7 +35,8 @@
       behavior="menu"
       :dense="$q.screen.xs"
       dark
-      @updateInputValue="submit"
+      clearable
+      @update:model-value="submit"
     />
     <div class="row">
       <q-select
@@ -49,7 +51,8 @@
         behavior="menu"
         :dense="$q.screen.xs"
         dark
-        @updateInputValue="submit"
+        clearable
+        @update:model-value="submit"
       />
       <div class="col-1" />
       <q-select
@@ -64,7 +67,8 @@
         behavior="menu"
         :dense="$q.screen.xs"
         dark
-        @updateInputValue="submit"
+        clearable
+        @update:model-value="submit"
       />
     </div>
     <q-select
@@ -75,7 +79,8 @@
       behavior="menu"
       :dense="$q.screen.xs"
       dark
-      @updateInputValue="submit"
+      clearable
+      @update:model-value="submit"
     />
     <q-select
       v-model="tmp.lens"
@@ -85,7 +90,8 @@
       behavior="menu"
       :dense="$q.screen.xs"
       dark
-      @updateInputValue="submit"
+      clearable
+      @update:model-value="submit"
     />
     <q-select
       v-model="tmp.nick"
@@ -95,7 +101,8 @@
       behavior="menu"
       :dense="$q.screen.xs"
       dark
-      @updateInputValue="submit"
+      clearable
+      @update:model-value="submit"
     />
   </form>
 </template>

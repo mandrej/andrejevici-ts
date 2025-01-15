@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh lpR fFf">
     <q-page-container>
-      <q-page v-if="lastRecord.href" class="row">
+      <q-page v-if="lastRecord && lastRecord.href" class="row">
         <q-responsive :ratio="1" class="col-xs-12 col-md-6 shadow-12" :style="imageStyle">
           <router-link
             :to="lastRecord.href"
