@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, onMounted, watch, defineAsyncComponent } from 'vue'
+import { ref, shallowRef, onMounted, defineAsyncComponent, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAppStore } from '../stores/app'
 import { useRoute } from 'vue-router'
@@ -48,8 +48,8 @@ onMounted(() => {
     showCarousel.value = true // Ensure the carousel is shown
   }
 })
-watch(showCarousel, (show) => {
-  if (show) {
+watchEffect(() => {
+  if (showCarousel.value === true) {
     currentView.value = SwiperView
   } else {
     currentView.value = ListView
