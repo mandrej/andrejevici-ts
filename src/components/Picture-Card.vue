@@ -1,5 +1,5 @@
 <template>
-  <q-card v-if="rec.thumb" v-bind="cardAttributes(rec.filename)">
+  <q-card v-if="rec.thumb" v-bind="cardAttributes(rec.filename)" class="bg-grey-3" flat>
     <q-card-section horizontal>
       <q-img
         class="cursor-pointer col"
@@ -66,7 +66,7 @@
     </q-card-section>
   </q-card>
 
-  <q-card v-else v-bind="cardAttributes(rec.filename)">
+  <q-card v-else v-bind="cardAttributes(rec.filename)" class="bg-grey-3" flat>
     <q-img
       class="cursor-pointer"
       loading="lazy"
